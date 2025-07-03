@@ -42,7 +42,7 @@ contract MerkleTree {
         return hash == root;
     }
 
-    function makeHash(string memory input) public pure returns(bytes32) {
+    function makeHash(string memory input) private pure returns(bytes32) {
         return keccak256(abi.encodePacked(input));
     }
 }
