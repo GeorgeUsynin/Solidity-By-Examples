@@ -5,12 +5,12 @@ pragma solidity ^0.8.30;
 contract MerkleTree {
     bytes32[] public hashes;
 
-    constructor(string[] memory transactionsArr){
-        for(uint i = 0; i < transactionsArr.length; i++){
-            hashes.push(makeHash(transactionsArr[i]));
+    constructor(string[] memory _transactionsArr){
+        for(uint i = 0; i < _transactionsArr.length; i++){
+            hashes.push(makeHash(_transactionsArr[i]));
         }
 
-        uint count = transactionsArr.length;
+        uint count = _transactionsArr.length;
         uint offset = 0;
 
         while(count > 1) {
@@ -25,24 +25,24 @@ contract MerkleTree {
         }
     }
 
-    function verify(string memory transaction, uint index, bytes32 root, bytes32[] memory proof) public pure returns (bool) {
-        bytes32 hash = makeHash(transaction);
+    function verify(string memory _transaction, uint _index, bytes32 _root, bytes32[] memory _proof) public pure returns (bool) {
+        bytes32 hash = makeHash(_transaction);
 
-        for(uint i = 0; i < proof.length; i++){
-            bytes32 element = proof[i];
-            if(index % 2 == 0){
+        for(uint i = 0; i < _proof.length; i++){
+            bytes32 element = _proof[i];
+            if(_index % 2 == 0){
                 hash = keccak256(abi.encodePacked(hash, element));
             } else {
                 hash = keccak256(abi.encodePacked(element, hash));
             }
 
-            index = index / 2;
+            _index = _index / 2;
         }
 
-        return hash == root;
+        return hash == _root;
     }
 
-    function makeHash(string memory input) private pure returns(bytes32) {
-        return keccak256(abi.encodePacked(input));
+    function makeHash(string memory _input) private pure returns(bytes32) {
+        return keccak256(abi.encodePacked(_input));
     }
 }
