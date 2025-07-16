@@ -1,5 +1,6 @@
 import { HardhatUserConfig } from 'hardhat/config';
 import '@nomicfoundation/hardhat-toolbox';
+import './tasks/sample_tasks';
 
 const config: HardhatUserConfig = {
   solidity: {
