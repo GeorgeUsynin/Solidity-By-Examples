@@ -5,7 +5,7 @@ pragma solidity ^0.8.30;
 error InvalidOwner(address owner);
 error TransactionAlreadyQueued(bytes32 txId);
 error NoTransactionInTheQueue(bytes32 txId);
-error TooEarlyExecution();
+error TooEarlyForExecution();
 error TransactionExpired();
 error TransactionFailed(bytes32 txId);
 error TimestampIsNoInTheRange();
@@ -62,7 +62,7 @@ contract Timelock {
     }
 
     function execute(address _to, string calldata _func, bytes calldata _data, uint _value, uint _timestamp) external payable onlyOwner returns (bytes memory){
-        require(block.timestamp > _timestamp, TooEarlyExecution());
+        require(block.timestamp > _timestamp, TooEarlyForExecution());
         require(block.timestamp < _timestamp + GRACE_PERIOD, TransactionExpired());
 
         bytes32 txId = keccak256(

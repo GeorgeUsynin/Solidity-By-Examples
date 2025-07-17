@@ -78,7 +78,7 @@ describe('Timelock', function () {
     ).to.be.revertedWithCustomError(timelock, 'NoTransactionInTheQueue');
   });
 
-  it('reverts transaction with `Too early for execution!` or `Transaction expired!` error', async function () {
+  it('reverts transaction with `TooEarlyForExecution` or `TransactionExpired` error', async function () {
     const { timelock, testTimelock, abiCoder } = await loadFixture(deploy);
 
     const { to, func, encodedData, value, timestamp } = await buildTxParams(
@@ -94,7 +94,7 @@ describe('Timelock', function () {
 
     await expect(
       timelock.execute(to, func, encodedData, value, timestamp, { value }),
-    ).to.be.revertedWithCustomError(timelock, 'TooEarlyExecution');
+    ).to.be.revertedWithCustomError(timelock, 'TooEarlyForExecution');
 
     await time.increase(87400);
     await mine();
