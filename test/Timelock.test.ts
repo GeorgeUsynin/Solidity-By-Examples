@@ -54,7 +54,7 @@ describe('Timelock', function () {
 
     await expect(
       timelock.addToQueue(to, func, encodedData, value, timestamp),
-    ).to.be.revertedWith('Transaction already in the queue!');
+    ).to.be.revertedWithCustomError(timelock, 'TransactionAlreadyQueued');
 
     await time.increase(200);
     await mine();
@@ -75,7 +75,7 @@ describe('Timelock', function () {
 
     await expect(
       timelock.execute(to, func, encodedData, value, timestamp, { value }),
-    ).to.be.revertedWith('No transaction in the queue!');
+    ).to.be.revertedWithCustomError(timelock, 'NoTransactionInTheQueue');
   });
 
   it('reverts transaction with `Too early for execution!` or `Transaction expired!` error', async function () {
@@ -94,14 +94,14 @@ describe('Timelock', function () {
 
     await expect(
       timelock.execute(to, func, encodedData, value, timestamp, { value }),
-    ).to.be.revertedWith('Too early for execution!');
+    ).to.be.revertedWithCustomError(timelock, 'TooEarlyExecution');
 
     await time.increase(87400);
     await mine();
 
     await expect(
       timelock.execute(to, func, encodedData, value, timestamp, { value }),
-    ).to.be.revertedWith('Transaction expired!');
+    ).to.be.revertedWithCustomError(timelock, 'TransactionExpired');
   });
 
   it('discards transaction from the queue', async function () {
@@ -136,8 +136,27 @@ describe('Timelock', function () {
 
     expect(await timelock.queue(txId)).to.eq(false);
 
-    await expect(timelock.discard(txId)).to.be.revertedWith(
-      'Transaction is not in the queue!',
+    await expect(timelock.discard(txId))
+      .to.be.revertedWithCustomError(timelock, 'NoTransactionInTheQueue')
+      .withArgs(txId);
+  });
+
+  it('checks that only owner can run the function', async function () {
+    const { timelock, testTimelock, abiCoder, user1 } =
+      await loadFixture(deploy);
+
+    const { to, func, encodedData, value, timestamp } = await buildTxParams(
+      testTimelock,
+      abiCoder,
+      100,
     );
+
+    await expect(
+      timelock
+        .connect(user1)
+        .addToQueue(to, func, encodedData, value, timestamp),
+    )
+      .to.be.revertedWithCustomError(timelock, 'InvalidOwner')
+      .withArgs(user1.address);
   });
 });

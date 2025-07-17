@@ -2,6 +2,14 @@
 
 pragma solidity ^0.8.30;
 
+error InvalidOwner(address owner);
+error TransactionAlreadyQueued(bytes32 txId);
+error NoTransactionInTheQueue(bytes32 txId);
+error TooEarlyExecution();
+error TransactionExpired();
+error TransactionFailed(bytes32 txId);
+error TimestampIsNoInTheRange();
+
 contract TestTimelock {
     string public message;
     uint public amount;
@@ -25,7 +33,7 @@ contract Timelock {
     event Executed(bytes32 txID);
 
     modifier onlyOwner() {
-        require(msg.sender == owner, "Not an owner!");
+        require(msg.sender == owner, InvalidOwner(msg.sender));
         _;
     }
 
@@ -34,7 +42,7 @@ contract Timelock {
     }
 
     function addToQueue(address _to, string calldata _func, bytes calldata _data, uint _value, uint _timestamp) external onlyOwner returns(bytes32){
-        require(_timestamp > block.timestamp + MIN_DELAY && _timestamp < block.timestamp + MAX_DELAY, "Please adjust the _timestamp!");
+        require(_timestamp > block.timestamp + MIN_DELAY && _timestamp < block.timestamp + MAX_DELAY, TimestampIsNoInTheRange());
         
         bytes32 txId = keccak256(
             abi.encode(
@@ -46,7 +54,7 @@ contract Timelock {
             )
         );
 
-        require(!queue[txId], "Transaction already in the queue!");
+        require(!queue[txId], TransactionAlreadyQueued(txId));
 
         queue[txId] = true;
         emit Queued(txId);
@@ -54,8 +62,8 @@ contract Timelock {
     }
 
     function execute(address _to, string calldata _func, bytes calldata _data, uint _value, uint _timestamp) external payable onlyOwner returns (bytes memory){
-        require(block.timestamp > _timestamp, "Too early for execution!");
-        require(block.timestamp < _timestamp + GRACE_PERIOD, "Transaction expired!");
+        require(block.timestamp > _timestamp, TooEarlyExecution());
+        require(block.timestamp < _timestamp + GRACE_PERIOD, TransactionExpired());
 
         bytes32 txId = keccak256(
             abi.encode(
@@ -67,7 +75,7 @@ contract Timelock {
             )
         );
 
-        require(queue[txId], "No transaction in the queue!");
+        require(queue[txId], NoTransactionInTheQueue(txId));
         queue[txId] = false;
 
         bytes memory data;
@@ -82,13 +90,13 @@ contract Timelock {
         }
 
         (bool success, bytes memory response) = _to.call{value: _value}(data);
-        require(success, "Transaction execution failed!");
+        require(success, TransactionFailed(txId));
         emit Executed(txId);
         return response;
     }
 
     function discard(bytes32 _txId) external {
-        require(queue[_txId], "Transaction is not in the queue!");
+        require(queue[_txId], NoTransactionInTheQueue(_txId));
         queue[_txId] = false;
         emit Discarded(_txId);
     }
