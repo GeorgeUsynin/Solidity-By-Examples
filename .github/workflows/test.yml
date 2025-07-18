@@ -9,6 +9,9 @@ jobs:
   run_tests:
     name: Run tests
     runs-on: ubuntu-latest
+    env:
+      SEPOLIA_URL: ${{ secrets.SEPOLIA_URL }}
+      OWNER_PRIVATE_KEY: ${{ secrets.OWNER_PRIVATE_KEY }}
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4

@@ -1,6 +1,9 @@
+import * as dotenv from 'dotenv';
 import { HardhatUserConfig } from 'hardhat/config';
 import '@nomicfoundation/hardhat-toolbox';
 import './tasks/sample_tasks';
+
+dotenv.config();
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -17,6 +20,10 @@ const config: HardhatUserConfig = {
     hardhat: {
       chainId: 31337,
       initialBaseFeePerGas: 0,
+    },
+    sepolia: {
+      url: process.env.SEPOLIA_URL,
+      accounts: [process.env.OWNER_PRIVATE_KEY!],
     },
   },
 };
