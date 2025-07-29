@@ -4,7 +4,7 @@ pragma solidity ^0.8.30;
 
 import './IERC721Receiver.sol';
 
-contract MyContract is IERC721Receiver {
+contract MyContract721 is IERC721Receiver {
     function onERC721Received(
         address,
         address,
