@@ -35,7 +35,7 @@ contract LowkickStarter {
     function startCampaign(uint _goal, uint _endsAt) public {
         require(_goal > 0, GoalShouldBeMoreThanZero());
         require(
-            _endsAt >= block.timestamp + MIN_DURATION &&
+            _endsAt > block.timestamp + MIN_DURATION &&
                 _endsAt <= block.timestamp + MAX_DURATION,
             EndAtShouldBeBetween3And30Days()
         );

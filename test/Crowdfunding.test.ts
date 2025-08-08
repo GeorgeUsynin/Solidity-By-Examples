@@ -16,7 +16,8 @@ describe('Crowdfunding', function () {
     const { lowkickStarter, organizer, pledger } = await loadFixture(deploy);
 
     const goal = ethers.parseEther('2.0');
-    const endsAt = Math.floor(Date.now() / 1000) + 259205;
+    const now = await time.latest();
+    const endsAt = now + 259320;
 
     // creating campaign
     await lowkickStarter.connect(organizer).startCampaign(goal, endsAt);
@@ -41,7 +42,7 @@ describe('Crowdfunding', function () {
       'CampaignStillInProgress',
     );
 
-    await time.increase(259210);
+    await time.increase(259321);
 
     const claimTx = await campaignAsOrganizer.claim();
     await claimTx.wait();
@@ -60,7 +61,8 @@ describe('Crowdfunding', function () {
     const { lowkickStarter, organizer, pledger } = await loadFixture(deploy);
 
     const goal = ethers.parseEther('2.0');
-    const endsAt = Math.floor(Date.now() / 1000) + 259205;
+    const now = await time.latest();
+    const endsAt = now + 259320;
 
     // creating campaign
     await lowkickStarter.connect(organizer).startCampaign(goal, endsAt);
@@ -80,7 +82,7 @@ describe('Crowdfunding', function () {
     });
     await pledgeTx.wait();
 
-    await time.increase(259210);
+    await time.increase(259321);
 
     await expect(campaignAsOrganizer.claim()).to.be.revertedWithCustomError(
       campaignAsOrganizer,
